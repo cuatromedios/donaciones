@@ -1,0 +1,33 @@
+<!-- ***
+ * Creado por Alonso el 19/10/2015.
+ *** -->
+ 
+ <template name="header">
+     <header >
+         <div class="navbar-fixed">
+             <nav>
+                 <div class="nav-wrapper">
+                     <h1 class="brand-logo"><img src="/img/logo.jpg"></h1>
+                     {{#if showMenu}}
+                         <a href="#" data-activates="nav-mobile" class="button-collapse right"><i class="mdi-navigation-menu"></i></a>
+                         <ul class="right hide-on-med-and-down">
+                             {{#each menu}}
+                                 <li><a href='{{href}}'><i class="{{icon}} teal-text text-lighten-2 left"></i> {{value}}</a></li>
+                             {{/each}}
+                         </ul>
+                         <ul id="nav-mobile" class="side-nav">
+                             {{#each menu}}
+                                 <li><a href='{{href}}'><i class="{{icon}} grey-text text-lighten-2 left"></i> {{value}}</a></li>
+                             {{/each}}
+                         </ul>
+                     {{/if}}
+                 </div>
+             </nav>
+         </div>
+     </header>
+     <script>
+         $( document ).ready(function(){
+             $(".button-collapse").sideNav();
+         })
+     </script>
+ </template>

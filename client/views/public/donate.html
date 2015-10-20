@@ -1,0 +1,117 @@
+<!-- ***
+ * Creado por Alonso el 19/10/2015.
+ *** -->
+ 
+ <template name="donate">
+     {{#if existe}}
+     <form id="formDonate">
+         <div class="row">
+             <h3>{{name}}</h3>
+             <h5>Datos Personales</h5>
+             <div class="col s12 input-field">
+                 <input type="text" name="name" id="name"/>
+                 <label for="name">Nombre</label>
+             </div>
+         </div>
+         <div class="row">
+             <div class="col s12 input-field">
+                 <input type="email" name="email" id="email"/>
+                 <label for="email">Correo Electrónico</label>
+             </div>
+         </div>
+         <div class="row">
+             <div class="col s12 input-field">
+                 <input type="number" name="amount" id="amount" min="10" value="{{defaultAmount}}"/>
+                 <label for="name" class="active">Cantidad</label>
+             </div>
+         </div>
+         <div class="row">
+             <div class="col s12 input-field">
+                 <h5>¿Cómo quieres hacer tus donaciones?</h5>
+                 <input class="with-gap" type="radio" name="paymentType" id="paymentTypeCredit" value="credit_card">
+                 <label for="paymentTypeCredit">Tarjeta de crédito.</label><br>
+                 <input disabled class="with-gap" type="radio" name="paymentType" id="paymentTypeTransfer" value="spei">
+                 <label for="paymentTypeTransfer">Transferencia bancaria (SPEI).</label><br>
+                 <input disabled class="with-gap" type="radio" name="paymentType" id="paymentTypeOxxo" value="oxxo">
+                 <label for="paymentTypeOxxo">Pagar en Oxxo.</label><br>
+                 <input disabled class="with-gap" type="radio" name="paymentType" id="paymentTypeDeposit" value="credit_card">
+                 <label for="paymentTypeDeposit">Depósito en Efectivo.</label><br>
+             </div>
+         </div>
+         <div class="row animate-height" id="divCreditCardInfo">
+             <h5>Datos Tarjeta de Crédito</h5>
+             <div class="row">
+                 <div class="col s12 input-field">
+                     <input type="text" id="creditCardName" data-conekta="card[name]" size="20" maxlength="20"/>
+                     <label for="creditCardName">Nombre del Tarjetahabiente</label>
+                 </div>
+                 <div class="col s9 input-field">
+                     <input type="text" id="creditCardNumber" data-conekta="card[number]" size="20" maxlength="19"/>
+                     <label for="creditCardNumber">Número de Tarjeta de Crédito</label>
+                 </div>
+                 <div class="col s3 input-field">
+                     <input type="text" id="creditCardCVC" data-conekta="card[cvc]" size="3" maxlength="3"/>
+                     <label for="creditCardCVC">CVC</label>
+                 </div>
+             </div>
+             <div class="row">
+                 Vencimiento:
+             </div>
+             <div class="row">
+                 <div class="col s6 input-field">
+                     <select class="browser-default" data-conekta="card[exp_month]">
+                         <option value="1">01</option>
+                         <option value="2">02</option>
+                         <option value="3">03</option>
+                         <option value="4">04</option>
+                         <option value="5">05</option>
+                         <option value="6">06</option>
+                         <option value="7">07</option>
+                         <option value="8">08</option>
+                         <option value="9">09</option>
+                         <option value="10">10</option>
+                         <option value="11">11</option>
+                         <option value="12">12</option>
+                     </select>
+                     <label for="creditCardDueMonth" class="active">Mes</label>
+                 </div>
+                 <div class="col s6 input-field">
+                     <select id="cardYearSelector" class="browser-default" data-conekta="card[exp_year]">
+                         {{#each years}}
+                             <option value="{{value}}">{{label}}</option>
+                         {{/each}}
+                     </select>
+                     <label for="cardYearSelector" class="active">Año</label>
+                 </div>
+             </div>
+         </div>
+
+         <div class="row">
+             <div class="col s12">
+                 <button class="btn green" type="submit">Donar!</button>
+             </div>
+         </div>
+     </form>
+         <script type="text/javascript">
+             // Conekta Public Key
+             Conekta.setPublishableKey('key_G5zLVdKQs5PfmpzFqLhMc6w');
+
+//             $(function () {
+//                 $("#card-form").submit(function(event) {
+//                     var = $(this);
+//
+//                     // Previene hacer submit más de una vez
+//                     $form.find("button").prop("disabled", true);
+//                     Conekta.token.create($form, conektaSuccessResponseHandler, conektaErrorResponseHandler);
+//
+//                     // Previene que la información de la forma sea enviada al servidor
+//                     return false;
+//                 });
+//             });
+//
+//             Meteor.call()
+         </script>
+     {{else}}
+         Proyecto no encontrado, verifique la dirección de internet.
+     {{/if}}
+ </template>
