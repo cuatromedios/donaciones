@@ -15,6 +15,7 @@ Template.donate.onCreated( function() {
             email: $form.email.value,
             amount: $form.amount.value,
             paymentType: $form.paymentType.value,
+            projectId: this.myData.get()._id,
             token: token
         };
 
@@ -22,12 +23,21 @@ Template.donate.onCreated( function() {
 
         Meteor.call("generatePayment", datos, function (err, regreso) {
             if (err) {
-                Materialize.toast(err.reason, 2000, "red");
+                Materialize.toast(err.reason, 5000, "red");
             } else {
-                Materialize.toast(regreso, 2000, "blue");
+                if (regreso && regreso.object == "error") {
+                    Materialize.toast(regreso.message_to_purchaser, 5000, "red");
+                }else if (!regreso) {
+                    //JAL. no debería regresar null, pero ya probé y hace la transacción con éxito a pesar de regresar null.
+                    Materialize.toast("Donacion exitosa! (Asumido por omisión)", 5000, "blue");
+                }else {
+                    Materialize.toast(regreso.status, 5000, "blue");
+                }
             }
             self.find("button").removeAttribute("disabled");
         });
+
+
     }.bind(this);
 });
 

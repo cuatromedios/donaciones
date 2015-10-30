@@ -5,3 +5,7 @@
 Meteor.publish("projects", function() {
     return Projects.find({});
 });
+
+Meteor.publish("donations", function() {
+    return Donations.find({});
+});

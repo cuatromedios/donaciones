@@ -3,9 +3,22 @@
  */
 
 Meteor.methods( {
-    'generatePayment': function(datos) {
+    'generatePayment': function(datos, conektaCallback) {
 
-        console.log(datos);
+        //console.log(datos);
+
+        var donativo = {
+            _idProject: datos.projectId,
+            name: datos.name,
+            email: datos.email,
+            amount: datos.amount,
+            paymentType: datos.paymentType,
+            date: new Date()
+        };
+
+        var donationId = Donations.insert( donativo );
+
+        var proj = Projects.findOne( { _id: datos.projectId } );
 
         var conekta = Meteor.npmRequire('conekta');
 
@@ -16,29 +29,30 @@ Meteor.methods( {
         conekta.api_key = "key_qb5ERkHLWdKh24z6w14XKA";
         conekta.locale = 'es';
 
-        //conekta.Charge.create({
-        //    description: 'Stogies',
-        //    amount: 50000,
-        //    currency: 'MXN',
-        //    reference_id: '9839-wolf_pack',
-        //    card: 'tok_test_visa_4242',
-        //    details: {
-        //        name: "Logan",
-        //        email: 'logan@x-men.org',
-        //        line_items: [{
-        //            name: "Donativo",
-        //            description: "Esto es un donativo",
-        //            unit_price: 50000,
-        //            quantity: 1
-        //        }]
-        //    }
-        //
-        //}, function(err, res) {
-        //    if (err) {
-        //        console.log(err.message_to_purchaser);
-        //        return;
-        //    }
-        //    console.log(res.toObject());
-        //});
+        var Future = Npm.require( 'fibers/future' );
+        var future = new Future();
+
+        conekta.Charge.create({
+            description: 'Donativo a "'+proj.name+'"',
+            amount: datos.amount * 100,
+            currency: 'MXN',
+            reference_id: donationId,
+            card: datos.token.id,
+            details: {
+                name: datos.name,
+                email: datos.email,
+                line_items: [{
+                    name: 'Donativo a "'+proj.name+'"',
+                    description: 'Donativo a "'+proj.name+'"',
+                    unit_price: datos.amount,
+                    quantity: 1
+                }]
+            }
+
+        }, function (res) {
+            future.return(res);
+        });
+
+        return future.wait();
     }
 });

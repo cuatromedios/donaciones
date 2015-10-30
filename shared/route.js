@@ -18,8 +18,12 @@ Router.configure({
     {
         if ( !Meteor.user() )//Esta llamada lo hace reactivo a los cambios en el usuario
         {
-            //No ha hecho login
-            this.render('logIn');
+            if (this.request.url.split('/')[1] == 'donate') {
+                this.next();
+            }else {
+                //No ha hecho login
+                this.render('logIn');
+            }
         }
         else
         {

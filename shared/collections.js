@@ -4,3 +4,4 @@
 
 
 Projects = new Mongo.Collection("projects");
+Donations = new Mongo.Collection("donations");
