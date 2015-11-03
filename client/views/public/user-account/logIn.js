@@ -9,15 +9,17 @@ Template.logIn.events({
 
         $(event.currentTarget.username).attr('disabled','disabled');
         $(event.currentTarget.password).attr('disabled','disabled');
+        $(event.currentTarget.submit).attr('disabled','disabled');
 
 
-        Meteor.loginWithPassword(event.currentTarget.username.value,event.currentTarget.password.value,
+        Meteor.loginWithPassword({username:event.currentTarget.username.value},event.currentTarget.password.value,
             function(err)
             {
                 if(err)
                 {
                     $(event.currentTarget.username).removeAttr('disabled');
                     $(event.currentTarget.password).removeAttr('disabled');
+                    $(event.currentTarget.submit).removeAttr('disabled','disabled');
                     $('#message').text(err.reason);
                 }
 

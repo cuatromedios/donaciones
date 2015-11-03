@@ -22,7 +22,8 @@ Template.header.helpers(
 
             switch(role)
             {
-                case 'donator':
+                case 'donor':
+                    result.push({href:'/myDonations',value:'Mis Donaciones', icon:'mdi-editor-attach-money'});
                     result.push({href:'/myAccount',value:'Mi Cuenta', icon:'mdi-action-account-circle'});
                     break;
                 case 'admin':

@@ -21,21 +21,25 @@ Template.donate.onCreated( function() {
 
         var self = this;
 
-        Meteor.call("generatePayment", datos, function (err, regreso) {
+        var command = "chargePayment";
+
+        if ($form.recurrent.checked) {
+            command = "createRecurrentSubscription";
+        }
+
+        Meteor.call(command, datos, function (err, regreso) {
             if (err) {
                 Materialize.toast(err.reason, 5000, "red");
             } else {
                 if (regreso && regreso.object == "error") {
                     Materialize.toast(regreso.message_to_purchaser, 5000, "red");
-                }else if (!regreso) {
-                    //JAL. no debería regresar null, pero ya probé y hace la transacción con éxito a pesar de regresar null.
-                    Materialize.toast("Donacion exitosa! (Asumido por omisión)", 5000, "blue");
-                }else {
-                    Materialize.toast(regreso.status, 5000, "blue");
+                } else {
+                    Materialize.toast(regreso, 5000, "blue");
                 }
             }
             self.find("button").removeAttribute("disabled");
         });
+
 
 
     }.bind(this);
@@ -50,6 +54,9 @@ Template.donate.helpers({
     }
     , existe: function() {
         return Template.instance().myData.get() !== undefined;
+    }
+    , checkRecurrent: function() {
+        return Template.instance().myData.get().recurrent ? "checked" : "";
     }
     , years: function () {
         var year = parseInt( (""+(new Date()).getFullYear()).substr(2,2) );

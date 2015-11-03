@@ -20,9 +20,13 @@
              </div>
          </div>
          <div class="row">
-             <div class="col s12 input-field">
+             <div class="col s6 input-field">
                  <input type="number" name="amount" id="amount" min="10" value="{{defaultAmount}}"/>
                  <label for="name" class="active">Cantidad</label>
+             </div>
+             <div class="col s6 input-field">
+                 <input type="checkbox" class="filled-in" name="recurrent" id="recurrent" {{checkRecurrent}}/>
+                 <label for="recurrent">Recurrente (Mensual)</label>
              </div>
          </div>
          <div class="row">
@@ -55,7 +59,9 @@
                  </div>
              </div>
              <div class="row">
+                 <div class="col s12">
                  Vencimiento:
+                 </div>
              </div>
              <div class="row">
                  <div class="col s6 input-field">
