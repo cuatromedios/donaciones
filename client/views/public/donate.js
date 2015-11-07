@@ -27,17 +27,23 @@ Template.donate.onCreated( function() {
             command = "createRecurrentSubscription";
         }
 
+        this.find('#progressBarDiv').style.display = "block";
+
         Meteor.call(command, datos, function (err, regreso) {
             if (err) {
                 Materialize.toast(err.reason, 5000, "red");
             } else {
                 if (regreso && regreso.object == "error") {
                     Materialize.toast(regreso.message_to_purchaser, 5000, "red");
+                    self.find("button").removeAttribute("disabled");
+                    self.find('#progressBarDiv').style.display = "none";
                 } else {
-                    Materialize.toast(regreso, 5000, "blue");
+                    Materialize.toast(regreso, 3000, "blue");
+                    Meteor.setTimeout( function() {
+                        Router.go("donateSuccess");
+                    }, 3000);
                 }
             }
-            self.find("button").removeAttribute("disabled");
         });
 
 
@@ -65,6 +71,9 @@ Template.donate.helpers({
             years.push( {label: (year+i), value: (year+i)} );
         }
         return years;
+    }
+    , conektaPublicAPIKey: function() {
+        return process.env.CONEKTA_PUBLIC_API_KEY;
     }
 });
 

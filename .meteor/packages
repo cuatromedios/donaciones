@@ -26,7 +26,8 @@ reactive-var
 iron:router
 less
 meteorhacks:npm
-meteorhacks:async
-
+http
+random
+momentjs:moment
 
 npm-container

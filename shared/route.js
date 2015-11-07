@@ -4,7 +4,14 @@
 
 Router.route('/logIn',{name:'logIn'});
 Router.route('/myAccount', {name: 'myAccount'});
-Router.route('/myDonations', {name: 'myDonations'} );
+Router.route('/myDonations', {name: 'myDonations',
+    waitOn: function () {
+            return [Meteor.subscribe("donations"),
+            Meteor.subscribe("projects")];
+        }
+    }
+);
+Router.route('/donateSuccess', {name: 'donateSuccess'});
 Router.route('/adminAccount',{name:'adminAccount'});
 
 Router.route('/donate/:id', {name: 'donate',
@@ -29,7 +36,8 @@ Router.route("/cwh", {
         console.log("=== METODO DE PAGO: "+this.request.body.data.object.payment_method);
         //console.log(this.request.body);
 
-        if (this.request.body.type == "charge.paid" && this.request.body.data.object.status == "paid") {
+        if (this.request.body.type == "charge.paid" && this.request.body.data &&
+            this.request.body.data.object && this.request.body.data.object.status == "paid") {
             //console.log("paid!");
             var deeta = this.request.body.data.object;
             var donation = Donations.findOne( { _id: deeta.reference_id } );
@@ -41,7 +49,10 @@ Router.route("/cwh", {
                 var user = Meteor.users.findOne( { 'profile.conekta.userId': deeta.customer_id } );
                 //console.log("user: ");
                 //console.log(user);
-                donation = Donations.findOne( { _idProject: proj._id, _idUser: user._id } );
+
+                if (proj && user) {
+                    donation = Donations.findOne( { _idProject: proj._id, _idUser: user._id } );
+                }
                 //console.log("donation: ");
                 //console.log(donation);
             }
@@ -74,7 +85,7 @@ Router.configure({
         }
         if ( !Meteor.user() )//Esta llamada lo hace reactivo a los cambios en el usuario
         {
-            if (this.request.url.split('/')[1] == 'donate') {
+            if (this.request.url.split('/')[1] == 'donate' || this.request.url.split('/')[1] == "donateSuccess") {
                 this.next();
             }else {
                 //No ha hecho login
@@ -94,6 +105,7 @@ Router.configure({
                     case 'adminProjects':
                     case 'adminAccount':
                     case 'donate':
+                    case 'donateSuccess':
                     case '':
                         this.next();
                         break;
@@ -104,6 +116,7 @@ Router.configure({
             }else if ( Roles.userIsInRole( loggedUser, "donor" ) ) {
                 switch ( urlSecondValue ) {
                     case 'donate':
+                    case 'donateSuccess':
                     case 'myAccount':
                     case 'myDonations':
                     case '':

@@ -16,17 +16,15 @@ Meteor.methods( {
             date: new Date()
         };
 
+        donativo._idUser = Meteor.call("createOrGetUser", datos);
+
         var donationId = Donations.insert( donativo );
 
         var proj = Projects.findOne( { _id: datos.projectId } );
 
         var conekta = Meteor.npmRequire('conekta');
 
-        //public key
-        //conekta.api_key = 'key_G5zLVdKQs5PfmpzFqLhMc6w';
-
-        //private key
-        conekta.api_key = "key_qb5ERkHLWdKh24z6w14XKA";
+        conekta.api_key = process.env.CONEKTA_PRIVATE_API_KEY;
         conekta.locale = 'es';
 
         var Future = Npm.require( 'fibers/future' );
@@ -53,7 +51,7 @@ Meteor.methods( {
             if (err) {
                 future.return(err);
             }else {
-                future.return(res);
+                future.return("Donativo recibido con éxito, gracias!");
             }
         });
 
@@ -63,10 +61,14 @@ Meteor.methods( {
 
         var user = Meteor.users.findOne({username: datos.email});
         if (user) {
-            return {
-                object: "error",
-                message_to_purchaser: "Usuario ya registrado (correo electrónico)"
-            };
+            var donation = Donations.findOne( { _idProject: datos.projectId, recurrent: true, _idUser: user._id } );
+
+            if (donation) {
+                return {
+                    object: "error",
+                    message_to_purchaser: "Usuario ya suscrito a este proyecto."
+                };
+            }
         }
 
         var donativo = {
@@ -83,11 +85,7 @@ Meteor.methods( {
 
         var conekta = Meteor.npmRequire('conekta');
 
-        //public key
-        //conekta.api_key = 'key_G5zLVdKQs5PfmpzFqLhMc6w';
-
-        //private key
-        conekta.api_key = "key_qb5ERkHLWdKh24z6w14XKA";
+        conekta.api_key = process.env.CONEKTA_PRIVATE_API_KEY;
         conekta.locale = 'es';
 
         var Future = Npm.require( 'fibers/future' );
@@ -103,23 +101,9 @@ Meteor.methods( {
                 future.return(err);
             }else {
 
-                var user = {
-                    username: datos.email,
-                    password: "abc",
-                    profile: {
-                        name: datos.name,
-                        conekta: {
-                            userId: customer.toObject().id,
-                            cards: [
-                                datos.token.id
-                            ]
-                        }
-                    }
-                };
+                datos.conektaCustomerId = customer.toObject().id;
 
-                donativo._idUser = Accounts.createUser( user );
-
-                Roles.addUsersToRoles( donativo._idUser, "donor" );
+                donativo._idUser = Meteor.call("createOrGetUser", datos);
 
                 var donationId = Donations.insert( donativo );
 
@@ -134,7 +118,6 @@ Meteor.methods( {
                         future.return(err);
                     }else {
 
-
                         customer.createSubscription({
                             "plan_id":plan.toObject().id
                         }, function(err, subscription) {
@@ -142,23 +125,94 @@ Meteor.methods( {
                                 future.return(err);
                             }else {
                                 if (subscription.toObject().status == "active") {
-                                    future.return("Subscripción creada con éxito!");
+                                    future.return("Aportación recurrente creada con éxito!");
                                 }else if (subscription.toObject().status == "past_due") {
                                     future.return({object:"error",message_to_purchaser:"No se pudo procesar la subscripción"});
                                 }
                             }
                         });
 
-
                     }
                 });
-
-
 
             }
         })
         );
 
         return future.wait();
+    }
+    ,createOrGetUser: function ( datos ) {
+
+        var user = Meteor.users.findOne( { username: datos.email });
+        var _idUser;
+
+        if (!user) {
+
+            var userPassword = Random.id(8);
+
+            user = {
+                username: datos.email,
+                password: userPassword,
+                profile: {
+                    name: datos.name,
+                    conekta: {
+                        cards: [
+                        ]
+                    }
+                }
+            };
+
+            if (datos.conektaCustomerId) {
+                user.profile.conekta.userId = datos.conektaCustomerId;
+            }
+
+            if (datos.token.id) {
+                user.profile.conekta.cards.push( datos.token.id );
+            }
+
+            _idUser = Accounts.createUser( user );
+
+            Roles.addUsersToRoles( _idUser, "donor" );
+
+            var subject = "Se ha creado una cuenta nueva en Hogar San Isidro";
+
+            var body = "Hola "+datos.name+"! Muchas gracias por tu donación a Hogar San Isidro!<br/><br/>";
+            body += "Se ha creado una cuenta nueva para que puedas revisar el estado de tus donaciones y ";
+            body += "subscripciones. Tu contraseña es: <br/><br/>";
+            body += userPassword + "<br/><br/>";
+            body += "Puedes acceder desde <a href='http://"+this.connection.httpHeaders.host+"'>http://"+this.connection.httpHeaders.host+"</a>";
+
+            Meteor.call("sendSimpleEmail", datos.email, subject, body);
+
+        }else {
+
+            _idUser = user._id;
+
+        }
+
+        return _idUser;
+    }
+    ,sendSimpleEmail: function (to, subject, body) {
+        this.unblock();
+
+        var postURL = process.env.MAILGUN_API_URL;
+
+        var options = {
+            auth: "api:" + process.env.MAILGUN_API_KEY,
+            params: {
+                "from": "Donaciones Hogar San Isidro <donaciones@hogarsanisidro.org>",
+                "to": to instanceof Array ? to : [to],
+                "subject": subject,
+                "html": body
+            }
+        };
+
+        var onError = function ( error, result ) {
+            if (error) {
+                console.log("Error: "+error);
+            }
+        };
+
+        Meteor.http.post(postURL, options, onError);
     }
 });

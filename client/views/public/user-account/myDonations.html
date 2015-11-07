@@ -4,4 +4,52 @@
  
  <template name="myDonations">
      <h2><i class="mdi-editor-attach-money "></i> Mis Donaciones</h2>
+     <br/>
+     <h3>Donaciones</h3>
+
+     <table>
+         <thead>
+         <tr>
+             <td>Proyecto</td>
+             <td>Fecha</td>
+             <td>Cantidad</td>
+             <td>Método de Pago</td>
+         </tr>
+         </thead>
+         <tbody>
+         {{#each donations}}
+             <tr>
+                 <td>{{projectName}}</td>
+                 <td>{{date}}</td>
+                 <td>${{amount}}</td>
+                 <td>{{paymentMethodString}}</td>
+             </tr>
+         {{/each}}
+
+         </tbody>
+     </table>
+
+     <h3>Aportaciones Recurrentes</h3>
+
+     <table>
+         <thead>
+         <tr>
+             <td>Proyecto</td>
+             <td>Fecha</td>
+             <td>Cantidad</td>
+             <td>Método de Pago</td>
+         </tr>
+         </thead>
+         <tbody>
+         {{#each subscriptions}}
+             <tr>
+                 <td>{{projectName}}</td>
+                 <td>{{date}}</td>
+                 <td>${{amount}}</td>
+                 <td>{{paymentMethodString}}</td>
+             </tr>
+         {{/each}}
+
+         </tbody>
+     </table>
  </template>

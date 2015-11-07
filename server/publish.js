@@ -7,5 +7,5 @@ Meteor.publish("projects", function() {
 });
 
 Meteor.publish("donations", function() {
-    return Donations.find({});
+    return Donations.find( { _idUser: this.userId } );
 });
