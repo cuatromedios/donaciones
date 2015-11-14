@@ -5,6 +5,7 @@
 Template.donate.onCreated( function() {
     this._id = Router.current().params.id;
     this.myData = new ReactiveVar( Projects.findOne({ url: this._id }) );
+    console.log(this.myData);
     this.conektaSuccessCallback = function(token) {
         //Success
 
@@ -54,6 +55,10 @@ Template.donate.onCreated( function() {
 Template.donate.helpers({
     name: function () {
         return Template.instance().myData.get().name;
+    }
+    ,
+    description: function () {
+        return Template.instance().myData.get().description;
     }
     , defaultAmount: function () {
         return Template.instance().myData.get().defaultAmount;

@@ -3,11 +3,17 @@
  *** -->
  
  <template name="donate">
+     <article>
      {{#if existe}}
      <form id="formDonate">
          <div class="row">
-             <h3>{{name}}</h3>
-             <h5>Datos Personales</h5>
+             <h1>Donar</h1>
+             <h2>Proyecto: {{name}}</h2>
+             <p>{{description}}</p>
+         </div>
+         <br>
+         <div class="row">
+             <h4>Datos Personales</h4>
              <div class="col s12 input-field">
                  <input type="text" name="name" id="name"/>
                  <label for="name">Nombre</label>
@@ -31,15 +37,15 @@
          </div>
          <div class="row">
              <div class="col s12 input-field">
-                 <h5>¿Cómo quieres hacer tus donaciones?</h5>
+                 <h4>¿Cómo quieres hacer tus donaciones?</h4>
                  <input class="with-gap" type="radio" name="paymentType" id="paymentTypeCredit" value="credit_card">
                  <label for="paymentTypeCredit">Tarjeta de crédito.</label><br>
-                 <input disabled class="with-gap" type="radio" name="paymentType" id="paymentTypeTransfer" value="spei">
+                 <!--<input disabled class="with-gap" type="radio" name="paymentType" id="paymentTypeTransfer" value="spei">
                  <label for="paymentTypeTransfer">Transferencia bancaria (SPEI).</label><br>
                  <input disabled class="with-gap" type="radio" name="paymentType" id="paymentTypeOxxo" value="oxxo">
                  <label for="paymentTypeOxxo">Pagar en Oxxo.</label><br>
                  <input disabled class="with-gap" type="radio" name="paymentType" id="paymentTypeDeposit" value="credit_card">
-                 <label for="paymentTypeDeposit">Depósito en Efectivo.</label><br>
+                 <label for="paymentTypeDeposit">Depósito en Efectivo.</label><br>-->
              </div>
          </div>
          <div class="row animate-height" id="divCreditCardInfo">
@@ -100,7 +106,7 @@
          </div>
          <div class="row">
              <div class="col s12">
-                 <button class="btn green" type="submit">Donar!</button>
+                 <button class="btn green" type="submit">¡Donar!</button>
              </div>
          </div>
      </form>
@@ -126,4 +132,5 @@
      {{else}}
          Proyecto no encontrado, verifique la dirección de internet.
      {{/if}}
+     </article>
  </template>

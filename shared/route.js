@@ -25,7 +25,7 @@ Router.route('/donate/:id', {name: 'donate',
 Router.route("/cwh", {
     where: 'server',
     action: function() {
-        console.log(" ======  RECIBIENDO NOTIFICACIÓN DE CONEKTA ====== ");
+        console.log(" ======  RECIBIENDO NOTIFICACIï¿½N DE CONEKTA ====== ");
         console.log("=== TIPO: "+this.request.body.type);
         console.log("=== USUARIO: "+this.request.body.data.object.customer_id);
         console.log("=== ID_REFERENCIA: "+this.request.body.data.object.reference_id);
