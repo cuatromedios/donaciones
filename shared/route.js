@@ -11,10 +11,10 @@ Router.route('/myDonations', {name: 'myDonations',
         }
     }
 );
-Router.route('/donateSuccess', {name: 'donateSuccess'});
+Router.route('/gracias', {name: 'donateSuccess'});
 Router.route('/adminAccount',{name:'adminAccount'});
 
-Router.route('/donate/:id', {name: 'donate',
+Router.route('/proyecto/:id', {name: 'donate',
     waitOn: function() {
         return [Meteor.subscribe("projects")];
     }
@@ -79,18 +79,14 @@ Router.configure({
     layoutTemplate: 'default',
     onBeforeAction: function ()
     {
-        if (this.request.url.split('/')[1] == 'cwh') {
+        if (this.request.url.split('/')[1] == 'cwh' || this.request.url.split('/')[1] == 'proyecto'
+            || this.request.url.split('/')[1] == "gracias" || this.request.url.split('/')[1] == "" ) {
             this.next();
             return;
         }
+
         if ( !Meteor.user() )//Esta llamada lo hace reactivo a los cambios en el usuario
         {
-            if (this.request.url.split('/')[1] == 'donate' || this.request.url.split('/')[1] == "donateSuccess") {
-                this.next();
-            }else {
-                //No ha hecho login
-                this.render('logIn');
-            }
         }
         else
         {
@@ -104,8 +100,8 @@ Router.configure({
                 {
                     case 'adminProjects':
                     case 'adminAccount':
-                    case 'donate':
-                    case 'donateSuccess':
+                    case 'proyecto':
+                    case 'gracias':
                     case '':
                         this.next();
                         break;
@@ -115,8 +111,8 @@ Router.configure({
 
             }else if ( Roles.userIsInRole( loggedUser, "donor" ) ) {
                 switch ( urlSecondValue ) {
-                    case 'donate':
-                    case 'donateSuccess':
+                    case 'proyecto':
+                    case 'gracias':
                     case 'myAccount':
                     case 'myDonations':
                     case '':
@@ -131,14 +127,30 @@ Router.configure({
     }
 });
 
-Router.route('/',{
-    action:function()
-    {
-        var role = Roles.getRolesForUser(Meteor.user())[0];
-
-        switch (role) {
-            case "admin": this.redirect("/adminAccount");break;
-            case "donor": this.redirect("/myAccount");break;
-        }
+Router.route('/', {
+    action: function () {
+        this.response.writeHead(302, {
+            'Location': "http://www.hogarsanisidro.org/como-ayudar"
+        });
+        this.response.end();
     }
+    ,where: 'server'
 });
+
+//{
+//        action:function()
+//        {
+//            //this.redirect("/logIn");
+//
+//
+////        this.redirect("http://www.hogarsanisidro.org/como-ayudar");
+//            /*
+//             var role = Roles.getRolesForUser(Meteor.user())[0];
+//
+//             switch (role) {
+//             case "admin": this.redirect("/adminAccount");break;
+//             case "donor": this.redirect("/myAccount");break;
+//             }*/
+//        }
+//    }
+//});

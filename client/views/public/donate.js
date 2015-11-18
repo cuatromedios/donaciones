@@ -28,8 +28,6 @@ Template.donate.onCreated( function() {
             command = "createRecurrentSubscription";
         }
 
-        this.find('#progressBarDiv').style.display = "block";
-
         Meteor.call(command, datos, function (err, regreso) {
             if (err) {
                 Materialize.toast(err.reason, 5000, "red");
@@ -37,11 +35,12 @@ Template.donate.onCreated( function() {
                 if (regreso && regreso.object == "error") {
                     Materialize.toast(regreso.message_to_purchaser, 5000, "red");
                     self.find("button").removeAttribute("disabled");
+                    self.find("button").innerHTML = "¡Donar!";
                     self.find('#progressBarDiv').style.display = "none";
                 } else {
                     Materialize.toast(regreso, 3000, "blue");
                     Meteor.setTimeout( function() {
-                        Router.go("donateSuccess");
+                        Router.go("/gracias");
                     }, 3000);
                 }
             }
@@ -100,13 +99,16 @@ Template.donate.events( {
         var $form = e.currentTarget;
 
         template.find("button").setAttribute("disabled", true);
-        template.find("button").setAtrribute("value", "procesando...")
+        template.find("button").innerHTML = "procesando...";
+
+        template.find('#progressBarDiv').style.display = "block";
 
         Conekta.token.create($form, template.conektaSuccessCallback, function (err) {
             //Fail
             Materialize.toast(err.message_to_purchaser,2000, "red");
             console.log(err);
             template.find("button").removeAttribute("disabled");
+            template.find("button").innerHTML = "¡Donar!";
         });
 
 
