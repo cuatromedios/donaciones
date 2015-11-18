@@ -5,7 +5,8 @@
 Template.donate.onCreated( function() {
     this._id = Router.current().params.id;
     this.myData = new ReactiveVar( Projects.findOne({ url: this._id }) );
-    console.log(this.myData);
+    this.autoUpdateCreditCardName = true;
+   // console.log(this.myData);
     this.conektaSuccessCallback = function(token) {
         //Success
 
@@ -83,15 +84,23 @@ Template.donate.helpers({
 
 Template.donate.events( {
     'keyup #name': function (e,template) {
-        template.$("#creditCardName").val(e.currentTarget.value);
-        template.$("label[for='creditCardName']")[0].classList.add("active");
+        if (template.autoUpdateCreditCardName) {
+            console.log("maxLEngth: "+e.currentTarget.maxLength);
+            template.$("#creditCardName").val(e.currentTarget.value.substr(0, parseInt(template.$("#creditCardName")[0].maxLength)));
+            template.$("label[for='creditCardName']")[0].classList.add("active");
+        }
     }
     ,'change #name': function (e,template) {
-        template.$("#creditCardName").val(e.currentTarget.value);
-        template.$("label[for='creditCardName']")[0].classList.add("active");
+        if (template.autoUpdateCreditCardName) {
+            template.$("#creditCardName").val(e.currentTarget.value.substr(0, parseInt(template.$("#creditCardName")[0].maxLength)));
+            template.$("label[for='creditCardName']")[0].classList.add("active");
+        }
     }
     , 'change #paymentTypeCredit': function (e,template) {
         template.$('#divCreditCardInfo').css('height','350px');
+    }
+    ,'change #creditCardName': function (e,template) {
+        template.autoUpdateCreditCardName = false;
     }
     , 'submit #formDonate': function (e,template) {
         e.preventDefault();
@@ -109,6 +118,7 @@ Template.donate.events( {
             console.log(err);
             template.find("button").removeAttribute("disabled");
             template.find("button").innerHTML = "¡Donar!";
+            template.find('#progressBarDiv').style.display = "none";
         });
 
 
