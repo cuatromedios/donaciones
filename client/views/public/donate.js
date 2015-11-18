@@ -100,6 +100,7 @@ Template.donate.events( {
         var $form = e.currentTarget;
 
         template.find("button").setAttribute("disabled", true);
+        template.find("button").setAtrribute("value", "procesando...")
 
         Conekta.token.create($form, template.conektaSuccessCallback, function (err) {
             //Fail
