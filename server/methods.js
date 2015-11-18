@@ -180,7 +180,7 @@ Meteor.methods( {
             body += "Se ha creado una cuenta nueva para que puedas revisar el estado de tus donaciones y ";
             body += "subscripciones. Tu contraseña es: <br/><br/>";
             body += userPassword + "<br/><br/>";
-            body += "Puedes acceder desde <a href='http://"+this.connection.httpHeaders.host+"'>http://"+this.connection.httpHeaders.host+"</a>";
+            body += "Puedes acceder desde <a href='http://"+this.connection.httpHeaders.host+"/logIn'>http://"+this.connection.httpHeaders.host+"/logIn</a>";
 
             Meteor.call("sendSimpleEmail", datos.email, subject, body);
 

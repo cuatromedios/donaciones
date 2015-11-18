@@ -2,7 +2,31 @@
  * Created by Alonso on 19/10/2015.
  */
 
-Router.route('/logIn',{name:'logIn'});
+Router.route('/logIn', {
+    onBeforeAction: function() {
+        if (!Meteor.user()) {
+            this.render('logIn');
+        }else {
+            this.next();
+        }
+    }
+    ,action: function () {
+        //this.redirect("/logIn");
+
+
+//        this.redirect("http://www.hogarsanisidro.org/como-ayudar");
+
+
+
+         var role = Roles.getRolesForUser(Meteor.user())[0];
+
+         switch (role) {
+        // case "admin": this.redirect("/adminAccount");break;
+            case "donor": this.redirect("/myDonations");break;
+         }
+    }
+});
+
 Router.route('/myAccount', {name: 'myAccount'});
 Router.route('/myDonations', {name: 'myDonations',
     waitOn: function () {
@@ -25,7 +49,7 @@ Router.route('/proyecto/:id', {name: 'donate',
 Router.route("/cwh", {
     where: 'server',
     action: function() {
-        console.log(" ======  RECIBIENDO NOTIFICACI�N DE CONEKTA ====== ");
+        console.log(" ======  RECIBIENDO NOTIFICACIÓN DE CONEKTA ====== ");
         console.log("=== TIPO: "+this.request.body.type);
         console.log("=== USUARIO: "+this.request.body.data.object.customer_id);
         console.log("=== ID_REFERENCIA: "+this.request.body.data.object.reference_id);
@@ -80,13 +104,15 @@ Router.configure({
     onBeforeAction: function ()
     {
         if (this.request.url.split('/')[1] == 'cwh' || this.request.url.split('/')[1] == 'proyecto'
-            || this.request.url.split('/')[1] == "gracias" || this.request.url.split('/')[1] == "" ) {
+            || this.request.url.split('/')[1] == "gracias" || this.request.url.split('/')[1] == ""
+            || this.request.url.split('/')[1] == "logIn") {
             this.next();
             return;
         }
 
         if ( !Meteor.user() )//Esta llamada lo hace reactivo a los cambios en el usuario
         {
+            this.redirect("/");
         }
         else
         {

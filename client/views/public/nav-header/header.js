@@ -6,10 +6,10 @@ Template.header.helpers(
     {
         showMenu: function()
         {
-            if(Meteor.user())
-            {
-                return true;
-            }
+            //if (Meteor.user())
+            //{
+            //    return true;
+            //}
 
             return false;
         }

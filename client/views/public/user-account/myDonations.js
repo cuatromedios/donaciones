@@ -26,6 +26,14 @@ Template.myDonations.helpers({
 
         return donations;
     },
+    user: function () {
+        if(!Meteor.user())
+        {
+            return {name:"",store:"",number:""};
+        }
+
+        return{name:Meteor.user().profile.name,store:Meteor.user().profile.store,number:Meteor.user().profile.employeenumber};
+    },
 
     subscriptions: function() {
         var don = Donations.find( { recurrent: true }).fetch();
@@ -45,5 +53,14 @@ Template.myDonations.helpers({
         });
 
         return donations;
+    }
+});
+
+Template.myDonations.events( {
+    'click #logout': function (e, template) {
+        Meteor.logout(function()
+        {
+            Router.go('/logIn');
+        });
     }
 });
