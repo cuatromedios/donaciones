@@ -9,3 +9,7 @@ Meteor.publish("projects", function() {
 Meteor.publish("donations", function() {
     return Donations.find( { _idUser: this.userId } );
 });
+
+Meteor.publish("plans", function() {
+    return Plans.find({});
+});

@@ -59,6 +59,8 @@ Meteor.methods( {
     },
     'createRecurrentSubscription': function (datos) {
 
+        //TODO: If something goes wrong at some point everything must be rolled back.
+
         var user = Meteor.users.findOne({username: datos.email});
         if (user) {
             var donation = Donations.findOne( { _idProject: datos.projectId, recurrent: true, _idUser: user._id } );
@@ -91,6 +93,8 @@ Meteor.methods( {
         var Future = Npm.require( 'fibers/future' );
         var future = new Future();
 
+        //TODO: No volver a crear el customer de conekta si ya existe.
+
         conekta.Customer.create({
             "name": datos.name,
             "email": datos.email,
@@ -107,39 +111,83 @@ Meteor.methods( {
 
                 var donationId = Donations.insert( donativo );
 
-                conekta.Plan.create({
-                    "id": donationId,
-                    "name": proj.name,
-                    "amount": datos.amount * 100,
-                    "currency": "MXN",
-                    "interval": "month"
-                }, function(err, plan) {
-                    if (err) {
-                        future.return(err);
-                    }else {
+                var plan = Meteor.call("createOrGetPlan", proj._id, datos.amount);
 
-                        customer.createSubscription({
-                            "plan_id":plan.toObject().id
-                        }, function(err, subscription) {
-                            if (err) {
-                                future.return(err);
-                            }else {
-                                if (subscription.toObject().status == "active") {
-                                    future.return("Aportación recurrente creada con éxito!");
-                                }else if (subscription.toObject().status == "past_due") {
-                                    future.return({object:"error",message_to_purchaser:"No se pudo procesar la subscripción"});
-                                }
+                if (plan.object == "error") {
+                    future.return(plan);
+                }else {
+
+                    customer.createSubscription({
+                        "plan_id":plan._idConektaPlan
+                    }, function(err, subscription) {
+                        if (err) {
+                            future.return(err);
+                        }else {
+                            if (subscription.toObject().status == "active") {
+                                future.return("Aportación recurrente creada con éxito!");
+                            }else if (subscription.toObject().status == "past_due") {
+                                future.return({object:"error",message_to_purchaser:"No se pudo procesar la subscripción"});
                             }
-                        });
+                        }
+                    });
 
-                    }
-                });
-
+                }
             }
         })
         );
 
         return future.wait();
+    }
+    ,createOrGetPlan: function ( projectId, amount ) {
+
+        var proj = Projects.findOne( { _id: projectId });
+
+        if (!proj) {
+            return { object: "error", message_to_purchaser: "Projecto no encontrado." };
+        }
+
+        var plan = Plans.findOne( { _idProject: projectId, amount: amount } );
+
+        if (!plan) {
+
+            var Future = Npm.require( 'fibers/future' );
+            var future = new Future();
+
+            var conekta = Meteor.npmRequire('conekta');
+
+            conekta.api_key = process.env.CONEKTA_PRIVATE_API_KEY;
+            conekta.locale = 'es';
+
+            conekta.Plan.create({
+                "id": proj.url+Random.id(8),
+                //JAL. Plan name is received as the charge description from the cokecta webhooks and it's used
+                //to get the project from which the subscription charge is being paid
+                "name": proj.name,
+                "amount": amount * 100,
+                "currency": "MXN",
+                "interval": "month"
+            }, Meteor.bindEnvironment(function(err, plan) {
+                if (err) {
+                    future.return(err);
+                }else {
+                    plan.toObject();
+
+                    var planObj = {
+                        _idProject: proj._id,
+                        _idConektaPlan: plan.toObject().id,
+                        projectName: proj.name,
+                        amount: amount
+                    };
+                    console.log("conekta plan created, inserting in own db");
+                    var planId = Plans.insert(planObj);
+                    future.return( Plans.findOne( {_id: planId } ) );
+                }
+            }));
+
+            return future.wait();
+        }
+
+        return plan;
     }
     ,createOrGetUser: function ( datos ) {
 
