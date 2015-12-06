@@ -2,6 +2,20 @@
  * Creado por Alonso el 19/10/2015.
  */
 
+Template.header.events(
+    {
+        "click #menubutton": function()
+        {
+            nav = document.getElementById("nav");
+            navcontainer = document.getElementById("navcontainer");
+            if (nav.style.height == "0px" || !nav.style.height) {
+                nav.style.height = "40px";
+            } else {
+                nav.style.height = "0px";
+            }
+        }
+    }
+)
 Template.header.helpers(
     {
         showMenu: function()
