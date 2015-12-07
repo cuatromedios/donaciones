@@ -92,12 +92,12 @@ Router.route("/cwh", {
                 };
                 Donations.update( { _id: donation._id }, {'$push': {payments: payment}} );
             }else {
-                PendingConektaNotifs.insert( this.request.body );
+                PendingConektaNotifs.insert( { body: this.request.body, date: new Date() } );
             }
         }else if (this.request.body.type == "ping") {
             // Just a normal ping, respond OK.
         }else {
-            PendingConektaNotifs.insert( this.request.body );
+            PendingConektaNotifs.insert( {body: this.request.body, date: new Date()} );
         }
 
         this.response.writeHead(200, {'Content-Type': 'text/html'});
