@@ -7,10 +7,10 @@
      {{#if existe}}
      <form id="formDonate">
          <div class="row">
-             <h1>Donar</h1>
-             <img class="full" src="http://www.hogarsanisidro.org/media/library/show/000/35/foto-ayudanos.1200x200_mc_noborder_crop_60.jpg">
-             <h2>Proyecto: {{name}}</h2>
-             <p>{{description}}</p>
+             <h1>{{name}}</h1>
+             <img class="full" src="/img/banner.jpg">
+             <p class="summary">{{description}}</p>
+             <p>Puedes ayudar con lo que tú desees, ya sea una sola vez o mensualmente.</p>
          </div>
          <br>
          <div class="row">
@@ -71,7 +71,7 @@
                  </div>
                  <div class="col s4 input-field">
                      <input type="text" id="creditCardCVC" data-conekta="card[cvc]" size="3" maxlength="3" required/>
-                     <label for="creditCardCVC">CVC (Tres últimos dígitos en la parte posterior)</label>
+                     <label for="creditCardCVC">CVC (Los 3 números de la parte posterior)</label>
                  </div>
              </div>
              <div class="row">

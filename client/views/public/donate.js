@@ -1,6 +1,9 @@
 /**
  * Creado por Alonso el 19/10/2015.
  */
+Template.donate.onRendered(function() {
+
+})
 
 Template.donate.onCreated( function() {
     this._id = Router.current().params.id;
