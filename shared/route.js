@@ -60,8 +60,8 @@ Router.route("/cwh", {
         console.log("=== METODO DE PAGO: "+this.request.body.data.object.payment_method);
         //console.log(this.request.body);
 
-        if (this.request.body.type == "charge.paid" && this.request.body.data &&
-            this.request.body.data.object && this.request.body.data.object.status == "paid") {
+        if (this.request.body.type == "charge.paid" && this.request.body.data !== undefined &&
+            this.request.body.data.object !== undefined && this.request.body.data.object.status == "paid") {
             //console.log("paid!");
             var deeta = this.request.body.data.object;
             var donation = Donations.findOne( { _id: deeta.reference_id } );
@@ -91,7 +91,13 @@ Router.route("/cwh", {
                     method: deeta.payment_method
                 };
                 Donations.update( { _id: donation._id }, {'$push': {payments: payment}} );
+            }else {
+                PendingConektaNotifs.insert( this.request.body );
             }
+        }else if (this.request.body.type == "ping") {
+            // Just a normal ping, respond OK.
+        }else {
+            PendingConektaNotifs.insert( this.request.body );
         }
 
         this.response.writeHead(200, {'Content-Type': 'text/html'});

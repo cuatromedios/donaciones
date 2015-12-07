@@ -71,7 +71,7 @@
                  </div>
                  <div class="col s4 input-field">
                      <input type="text" id="creditCardCVC" data-conekta="card[cvc]" size="3" maxlength="3" required/>
-                     <label for="creditCardCVC">CVC</label>
+                     <label for="creditCardCVC">CVC (Tres últimos dígitos en la parte posterior)</label>
                  </div>
              </div>
              <div class="row">
@@ -124,20 +124,6 @@
              // Conekta Public Key
              Conekta.setPublishableKey('key_MDFfKwJ9wcxzBrqqGJyrWNg');
 
-//             $(function () {
-//                 $("#card-form").submit(function(event) {
-//                     var = $(this);
-//
-//                     // Previene hacer submit más de una vez
-//                     $form.find("button").prop("disabled", true);
-//                     Conekta.token.create($form, conektaSuccessResponseHandler, conektaErrorResponseHandler);
-//
-//                     // Previene que la información de la forma sea enviada al servidor
-//                     return false;
-//                 });
-//             });
-//
-//             Meteor.call()
          </script>
      {{else}}
          Proyecto no encontrado, verifique la dirección de internet.
