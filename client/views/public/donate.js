@@ -19,6 +19,7 @@ Template.donate.onCreated( function() {
             name: $form.name.value,
             email: $form.email.value,
             amount: $form.amount.value,
+            phone: $form.phone.value,
             paymentType: $form.paymentType.value,
             projectId: this.myData.get()._id,
             token: token

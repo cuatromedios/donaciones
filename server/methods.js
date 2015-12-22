@@ -301,6 +301,7 @@ Meteor.methods( {
                 profile: {
                     name: datos.name,
                     email: datos.email,
+                    phone: datos.phone,
                     conekta: {
                         cards: [
                         ]
