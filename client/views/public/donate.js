@@ -88,7 +88,7 @@ Template.donate.helpers({
 Template.donate.events( {
     'keyup #name': function (e,template) {
         if (template.autoUpdateCreditCardName) {
-            console.log("maxLEngth: "+e.currentTarget.maxLength);
+            //console.log("maxLEngth: "+e.currentTarget.maxLength);
             template.$("#creditCardName").val(e.currentTarget.value.substr(0, parseInt(template.$("#creditCardName")[0].maxLength)));
             template.$("label[for='creditCardName']")[0].classList.add("active");
         }

@@ -3,56 +3,58 @@
  *** -->
  
  <template name="myDonations">
-     <h2><i class="mdi-editor-attach-money "></i> Mis Donaciones</h2>
-    <h2><i class="mdi-action-account-circle "></i> {{user.name}}</h2>
-    <button class="btn red" id="logout">Salir</button>
+     <article>
+         <h2><i class="mdi-editor-attach-money "></i> Mis Donaciones</h2>
+        <h2><i class="mdi-action-account-circle "></i> {{user.name}}</h2>
+        <button class="btn red" id="logout">Salir</button>
 
-     <br/>
-     <h3>Donaciones</h3>
+         <br/>
+         <h3>Donaciones</h3>
 
-     <table>
-         <thead>
-         <tr>
-             <td>Proyecto</td>
-             <td>Fecha</td>
-             <td>Cantidad</td>
-             <td>Método de Pago</td>
-         </tr>
-         </thead>
-         <tbody>
-         {{#each donations}}
+         <table>
+             <thead>
              <tr>
-                 <td>{{projectName}}</td>
-                 <td>{{date}}</td>
-                 <td>${{amount}}</td>
-                 <td>{{paymentMethodString}}</td>
+                 <th>Proyecto</th>
+                 <th>Fecha</th>
+                 <th>Cantidad</th>
+                 <th>Método de Pago</th>
              </tr>
-         {{/each}}
+             </thead>
+             <tbody>
+             {{#each donations}}
+                 <tr>
+                     <td>{{projectName}}</td>
+                     <td>{{date}}</td>
+                     <td>${{amount}}</td>
+                     <td>{{paymentMethodString}}</td>
+                 </tr>
+             {{else}}
+                <tr><td colspan="4">No hay donaciones.</td></tr>
+             {{/each}}
 
-         </tbody>
-     </table>
+             </tbody>
+         </table>
 
-     <h3>Aportaciones Recurrentes</h3>
+         <h3>Aportaciones Recurrentes</h3>
 
-     <table>
-         <thead>
-         <tr>
-             <td>Proyecto</td>
-             <td>Fecha</td>
-             <td>Cantidad</td>
-             <td>Método de Pago</td>
-         </tr>
-         </thead>
-         <tbody>
-         {{#each subscriptions}}
+         <table>
+             <thead>
              <tr>
-                 <td>{{projectName}}</td>
-                 <td>{{date}}</td>
-                 <td>${{amount}}</td>
-                 <td>{{paymentMethodString}}</td>
+                 <th>Proyecto</th>
+                 <th>Fecha</th>
+                 <th>Cantidad</th>
+                 <th>Método de Pago</th>
+                 <th>&nbsp;</th>
              </tr>
-         {{/each}}
+             </thead>
+             <tbody>
+             {{#each subscriptions}}
+                 {{>recurrentDonationElement}}
+             {{else}}
+             <tr><td colspan="5">No hay aportaciones recurrentes.</td></tr>
+             {{/each}}
 
-         </tbody>
-     </table>
+             </tbody>
+         </table>
+     </article>
  </template>

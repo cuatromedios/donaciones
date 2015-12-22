@@ -3,25 +3,28 @@
  *** -->
  
  <template name="logIn">
-     <form id="formLogin">
+     <article>
+         <form id="formLogin">
 
-         <div class="row ">
-             <div class="input-field col s12">
-                 <i class="mdi-action-account-circle prefix"></i>
-                 <label for="username">Usuario / Correo Electrónico</label>
-                 <input id="username" type="text" name="username" required/>
+             <div class="row ">
+                 <div class="input-field col s12">
+                     <i class="mdi-action-account-circle prefix"></i>
+                     <label for="username">Usuario / Correo Electrónico</label>
+                     <input id="username" type="text" name="username" required/>
+                 </div>
              </div>
-         </div>
-         <div class="row ">
-             <div class="input-field col s12">
-                 <i class="mdi-action-visibility-off prefix"></i>
-                 <label for="password">Contraseña</label>
-                 <input id="password" type="password" name="password" required/>
+             <div class="row ">
+                 <div class="input-field col s12">
+                     <i class="mdi-action-visibility-off prefix"></i>
+                     <label for="password">Contraseña</label>
+                     <input id="password" type="password" name="password" required/>
+                 </div>
              </div>
-         </div>
 
-         <button type="submit" id="submit" class="btn right">Ingresar</button>
-         <span id="message"></span>
+             <button type="submit" id="submit" class="btn right">Ingresar</button>
+             <span id="message"></span>
 
-     </form>
+         </form>
+         <br/><br/><br/>
+     </article>
  </template>

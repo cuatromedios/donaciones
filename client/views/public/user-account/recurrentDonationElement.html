@@ -1,0 +1,21 @@
+<!-- ***
+ * Creado por Alonso el 21/12/2015.
+ *** -->
+ 
+ <template name="recurrentDonationElement">
+     <tr>
+         <td>{{projectName}}</td>
+         <td>{{date}}</td>
+         <td>${{amount}}</td>
+         <td>{{paymentMethodString}}</td>
+         <td>{{#if isActive subscription_status}}
+             <div class="etiqueta blue">Activa</div><a class="red-text modal-trigger" style="display: inline-block; font-size: 0.75em;" href="#modal{{_id}}">Cancelar</a>
+         {{else}}
+             <div class="etiqueta grey">Cancelada</div>
+         {{/if}}
+             <div class="modal" id="modal{{_id}}">
+                 {{>confirmCancelSubscription _id}}
+             </div>
+         </td>
+     </tr>
+ </template>

@@ -8,7 +8,7 @@ Meteor.startup( function() {
         //No hay administrador, crear nueva BD.
 
         Roles.createRole("admin");
-        Roles.createRole("donator");
+        Roles.createRole("donor");
 
         var adminId = Accounts.createUser( {
             username: 'admin',

@@ -16,7 +16,7 @@ Meteor.methods( {
             date: new Date()
         };
 
-        donativo._idUser = Meteor.call("createOrGetUser", datos);
+        donativo._idUser = Meteor.call("createOrGetUser", datos)._id;
 
         var donationId = Donations.insert( donativo );
 
@@ -63,7 +63,8 @@ Meteor.methods( {
 
         var user = Meteor.users.findOne({username: datos.email});
         if (user) {
-            var donation = Donations.findOne( { _idProject: datos.projectId, recurrent: true, _idUser: user._id } );
+            var donation = Donations.findOne( { _idProject: datos.projectId, recurrent: true,
+                _idUser: user._id, subscriptionStatus: 'active' } );
 
             if (donation) {
                 return {
@@ -93,50 +94,107 @@ Meteor.methods( {
         var Future = Npm.require( 'fibers/future' );
         var future = new Future();
 
-        //TODO: No volver a crear el customer de conekta si ya existe.
+        user = Meteor.call("createOrGetUser", datos);
 
-        conekta.Customer.create({
-            "name": datos.name,
-            "email": datos.email,
-           // "phone": "55-5555-5555",
-            "cards": [datos.token.id]
-        }, Meteor.bindEnvironment(function(err, customer) {
+        donativo._idUser = user._id;
+
+        var customer = Meteor.call("createCustomer", user, datos.token.id);
+
+        if (customer.object == "error") {
+            // We got an error, not a customer, return the error.
+            return customer;
+        }
+
+        donativo._idConektaCustomer = customer.toObject().id;
+
+        //JAL. Save donation data with ConektaCustomerId so we have it on the db when the conekta
+        //      subscription.paid notification arrives.
+        var _idDonation = Donations.insert( donativo );
+
+        var plan = Meteor.call("createOrGetPlan", proj._id, datos.amount);
+
+        if (plan.object == "error") {
+            return plan;
+        }
+
+        customer.createSubscription({
+            "plan_id":plan._idConektaPlan
+        }, Meteor.bindEnvironment( function(err, subscription) {
             if (err) {
                 future.return(err);
             }else {
+                if (subscription.toObject().status == "active") {
 
-                datos.conektaCustomerId = customer.toObject().id;
+                    ////JAL. Save subscription id to user conekta profile.
+                    //
+                    //Meteor.users.update( {_id: user._id},
+                    //    { '$push':
+                    //        {'profile.conekta.subscriptions': {
+                    //            //subscriptionId: subscription.toObject().id,
+                    //            customerId: customer.toObject().id,
+                    //            status: "active"
+                    //            }
+                    //        }
+                    //    } );
 
-                donativo._idUser = Meteor.call("createOrGetUser", datos);
+                    Donations.update( { _id: _idDonation }, {'$set':{subscriptionStatus:'active'}});
 
-                var donationId = Donations.insert( donativo );
+                    future.return("Aportación recurrente creada con éxito!");
 
-                var plan = Meteor.call("createOrGetPlan", proj._id, datos.amount);
+                }else if (subscription.toObject().status == "past_due") {
 
-                if (plan.object == "error") {
-                    future.return(plan);
-                }else {
-
-                    customer.createSubscription({
-                        "plan_id":plan._idConektaPlan
-                    }, function(err, subscription) {
-                        if (err) {
-                            future.return(err);
-                        }else {
-                            if (subscription.toObject().status == "active") {
-                                future.return("Aportación recurrente creada con éxito!");
-                            }else if (subscription.toObject().status == "past_due") {
-                                future.return({object:"error",message_to_purchaser:"No se pudo procesar la subscripción"});
-                            }
-                        }
-                    });
-
+                    future.return({object:"error",message_to_purchaser:"No se pudo procesar la subscripción"});
                 }
             }
         })
         );
 
         return future.wait();
+    }
+    ,cancelSubscription: function ( cusId ) {
+        var user = Meteor.users.findOne(
+            { 'profile.conekta.subscriptions': {'$elemMatch': {customerId: cusId} } }
+        );
+
+        _.each(user.profile.conekta.subscriptions, function (e) {
+            if (e.customerId == cusId) {
+                e.status = "canceled";
+            }
+        });
+
+        Meteor.users.update( { _id: user._id }, user );
+
+    }
+    ,cancelRecurrentDonation: function( _idDonation ) {
+        var donation = Donations.findOne( { _id: _idDonation } );
+
+        var conekta = Meteor.npmRequire('conekta');
+
+        conekta.api_key = process.env.CONEKTA_PRIVATE_API_KEY;
+        conekta.locale = 'es';
+
+        var Future = Npm.require( 'fibers/future' );
+        var future = new Future();
+
+        conekta.Customer.find(donation._idConektaCustomer, Meteor.bindEnvironment( function(err,customer) {
+                if (err) {
+                    future.return(err);
+                }else {
+                    customer.subscription.cancel( Meteor.bindEnvironment( function( err, res ) {
+                            if (err) {
+                                future.return(err);
+                            }else {
+                                Donations.update( { _id: _idDonation }, { '$set': { subscriptionStatus: 'canceled' } } );
+                                future.return(true);
+                            }
+                        })
+                    );
+                }
+            })
+        );
+
+        return future.wait();
+
     }
     ,createOrGetPlan: function ( projectId, amount ) {
 
@@ -160,7 +218,7 @@ Meteor.methods( {
 
             conekta.Plan.create({
                 "id": proj.url+Random.id(8),
-                //JAL. Plan name is received as the charge description from the cokecta webhooks and it's used
+                //JAL. Plan name is received as the charge 'description' from the conekta webhooks and it's used
                 //to get the project from which the subscription charge is being paid
                 "name": proj.name,
                 "amount": amount * 100,
@@ -170,7 +228,7 @@ Meteor.methods( {
                 if (err) {
                     future.return(err);
                 }else {
-                    plan.toObject();
+                    //plan.toObject();
 
                     var planObj = {
                         _idProject: proj._id,
@@ -189,10 +247,49 @@ Meteor.methods( {
 
         return plan;
     }
+    ,createCustomer: function ( user, cardToken ) {
+
+        var Future = Npm.require( 'fibers/future' );
+        var future = new Future();
+
+        var conekta = Meteor.npmRequire('conekta');
+
+        conekta.api_key = process.env.CONEKTA_PRIVATE_API_KEY;
+        conekta.locale = 'es';
+
+        //if (user.profile.conekta.userId === undefined) {
+
+        conekta.Customer.create({
+                "name": user.profile.name,
+                "email": user.profile.email,
+                // "phone": "55-5555-5555",
+                "cards": [cardToken]
+            }, Meteor.bindEnvironment( function ( err, customer ) {
+                if (err) {
+                    future.return(err);
+                }else {
+                    future.return(customer);
+                }
+            })
+        );
+
+        //}else {
+        //    conekta.Customer.find(user.profile.conekta.userId,
+        //        Meteor.bindEnvironment(function(err,customer) {
+        //            if (err) {
+        //                future.return(err);
+        //            }else {
+        //                future.return(customer);
+        //            }
+        //        })
+        //    );
+        //}
+
+        return future.wait();
+    }
     ,createOrGetUser: function ( datos ) {
 
         var user = Meteor.users.findOne( { username: datos.email });
-        var _idUser;
 
         if (!user) {
 
@@ -203,6 +300,7 @@ Meteor.methods( {
                 password: userPassword,
                 profile: {
                     name: datos.name,
+                    email: datos.email,
                     conekta: {
                         cards: [
                         ]
@@ -218,27 +316,33 @@ Meteor.methods( {
                 user.profile.conekta.cards.push( datos.token.id );
             }
 
-            _idUser = Accounts.createUser( user );
+            user._id = Accounts.createUser( user );
 
-            Roles.addUsersToRoles( _idUser, "donor" );
+            Roles.addUsersToRoles( user._id , "donor" );
 
             var subject = "Se ha creado una cuenta nueva en Hogar San Isidro";
 
-            var body = "Hola "+datos.name+"! Muchas gracias por tu donación a Hogar San Isidro!<br/><br/>";
+            var body = "Hola "+datos.name+"!<br/>¡Muchas gracias por tu donación a Hogar San Isidro!<br/><br/>";
             body += "Se ha creado una cuenta nueva para que puedas revisar el estado de tus donaciones y ";
-            body += "subscripciones. Tu contraseña es: <br/><br/>";
-            body += userPassword + "<br/><br/>";
-            body += "Puedes acceder desde <a href='http://"+this.connection.httpHeaders.host+"/logIn'>http://"+this.connection.httpHeaders.host+"/logIn</a>";
+            body += "subscripciones.<br/><br/>";
+            body += "Puedes ingresar a revisar tus pagos utilizando:<br/>";
+            body += "Usuario: " + datos.email + "<br/>";
+            body += "Contraseña: " + userPassword + "<br/>";
+            body += "En la dirección: <a href='http://"+this.connection.httpHeaders.host+"/mi-cuenta'>http://"+this.connection.httpHeaders.host+"/mi-cuenta</a>";
 
             Meteor.call("sendSimpleEmail", datos.email, subject, body);
 
         }else {
+            if (datos.token.id) {
+                var hasCard = Meteor.users.findOne({ _id: user._id, 'profile.conekta.cards':{'$in':[datos.token.id]}});
 
-            _idUser = user._id;
-
+                if (!hasCard) {
+                    Meteor.users.update( { _id: user._id }, {'$push':{'profile.conekta.cards':datos.token.id}} );
+                }
+            }
         }
 
-        return _idUser;
+        return user;
     }
     ,sendSimpleEmail: function (to, subject, body) {
         this.unblock();

@@ -37,8 +37,8 @@ Template.header.helpers(
             switch(role)
             {
                 case 'donor':
-                    result.push({href:'/myDonations',value:'Mis Donaciones', icon:'mdi-editor-attach-money'});
-                    result.push({href:'/myAccount',value:'Mi Cuenta', icon:'mdi-action-account-circle'});
+                    result.push({href:'/mi-cuenta/donaciones',value:'Mis Donaciones', icon:'mdi-editor-attach-money'});
+                    result.push({href:'/mi-cuenta',value:'Mi Cuenta', icon:'mdi-action-account-circle'});
                     break;
                 case 'admin':
                     result.push({href:'/adminProjects',value:'Proyectos', icon:'mdi-action-assignment-turned-in'});

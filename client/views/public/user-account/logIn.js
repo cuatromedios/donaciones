@@ -20,7 +20,8 @@ Template.logIn.events({
                     $(event.currentTarget.username).removeAttr('disabled');
                     $(event.currentTarget.password).removeAttr('disabled');
                     $(event.currentTarget.submit).removeAttr('disabled','disabled');
-                    $('#message').text(err.reason);
+                    //$('#message').text(err.reason);
+                    Materialize.toast(err.reason,2000,"red");
                 }
 
             });
