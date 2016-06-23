@@ -39,6 +39,7 @@ Meteor.methods( {
             details: {
                 name: datos.name,
                 email: datos.email,
+                phone: datos.phone,
                 line_items: [{
                     name: 'Donativo a "'+proj.name+'"',
                     description: 'Donativo a "'+proj.name+'"',
